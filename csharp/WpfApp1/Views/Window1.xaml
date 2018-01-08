@@ -1,21 +1,26 @@
-﻿<Window x:Class="WpfApp1.MainWindow"
+﻿<Window x:Class="WpfApp1.Views.Window1"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WpfApp1"
+        xmlns:local="clr-namespace:WpfApp1.Views"
+        xmlns:ViewModels="clr-namespace:WpfApp1.ViewModels"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-   <Grid>
+        Title="Window1" Height="300" Width="300">
+    <Window.DataContext>
+        <ViewModels:ConfigureControlView/>
+    </Window.DataContext>
+    <Grid>
         <StackPanel>
             <TextBlock>Subscription Key</TextBlock>
             <TextBox Name="KeyTextBox" Text="{Binding SubscriptionKey, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
             <TextBlock >Subscription Endpoint</TextBlock>
             <TextBox Name="EndpointTextBox" Text="{Binding SubscriptionEndpoint, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
             <TextBlock>Image Or Url</TextBlock>
-            <TextBox Name="ImageFilePathTextBox" Text="{Binding Path=ImageFilePath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
-            <Button Name="ImageFilePathBrowseButton" Content="Browse" Click="btnOpenFiles_Click" HorizontalAlignment="Right"/>
-            <Button Name="SolveButton" Click="btnSolveIt">Solve</Button>
+            <TextBox Name="ImageFilePathTextBox" Text="{Binding Path=ImageFilePath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+            <Button Name="ImageFilePathBrowseButton" Content="Browse" Command="{Binding BtnOpenFiles_Click}"/>
+            <Button Name="RestoreButton" Content="Restore" Command="{Binding BtnRestore_Click}"/>
+            <Button Name="SolveButton" Command="{Binding BtnSolveIt_Click}">Solve</Button>
         </StackPanel>
     </Grid>
 </Window>

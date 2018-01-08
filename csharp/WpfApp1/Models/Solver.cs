@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,16 +8,17 @@ using System.Threading.Tasks;
 using OpenCvSharp;
 using Microsoft.ProjectOxford.Vision;
 
-namespace WpfApp1
+namespace WpfApp1.Models
 {
-    class solver
+    class Solver
     {
-        public solver()
+        public Solver()
         {
 
         }
 
         private readonly int n = 9;
+        private readonly string TempFile = "temp.jpg";
 
         public void SolveThePuzzle(string filename, string key, string endpoint)
         {
@@ -40,7 +42,7 @@ namespace WpfApp1
                     }
                 }
                 Cv2.HConcat(blkNonEmpty.ToArray(), digitsAll);
-
+                recognizeDigits(digitsAll, key, endpoint);
 
                 using (new Window("Image", WindowMode.Normal, digitsAll))
                 {
@@ -144,9 +146,15 @@ namespace WpfApp1
         }
 
 
-        private void recognizeDigits(string key, string endpoint)
+        private void recognizeDigits(Mat img, string key, string endpoint)
         {
-            VisionServiceClient srv = new VisionServiceClient(key, endpoint);
+            Cv2.ImWrite(TempFile, img);
+            using (FileStream stream = File.Open(TempFile, FileMode.Open, FileAccess.Read))
+            {
+                VisionServiceClient srv = new VisionServiceClient(key, endpoint);
+                var response = srv.RecognizeTextAsync(stream);
+            }
+
         }
     }
 }

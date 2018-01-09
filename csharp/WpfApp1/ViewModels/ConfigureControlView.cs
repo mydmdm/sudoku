@@ -59,6 +59,20 @@ namespace WpfApp1.ViewModels
             }
         }
 
+        private string _resultMessage;
+        public string ResultMessage
+        {
+            get
+            {
+                return _resultMessage;
+            }
+            set
+            {
+                _resultMessage = value;
+                RaisePropertyChangedEvent("ResultMessage");
+            }
+        }
+
         public ICommand BtnOpenFiles_Click
         {
             get
@@ -87,7 +101,7 @@ namespace WpfApp1.ViewModels
                 {
                     StoreCfgToFile(CfgFile);
                     Solver obj = new Solver();
-                    obj.SolveThePuzzle(ImageFilePath, SubscriptionKey, SubscriptionEndpoint);
+                    ResultMessage = obj.SolveThePuzzle(ImageFilePath, SubscriptionKey, SubscriptionEndpoint);
                 });
             }
         }

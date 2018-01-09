@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using OpenCvSharp;
 using Microsoft.ProjectOxford.Vision;
+using System.Net;
 
 namespace WpfApp1.Models
 {
@@ -20,7 +21,7 @@ namespace WpfApp1.Models
         private readonly int n = 9;
         private readonly string TempFile = "temp.jpg";
 
-        public void SolveThePuzzle(string filename, string key, string endpoint)
+        public string SolveThePuzzle(string filename, string key, string endpoint)
         {
             try
             {
@@ -34,7 +35,7 @@ namespace WpfApp1.Models
                 SplitToDigits(img, out List<Mat> digits, out List<int> puzzle, new Size(50, 50));
                 Mat digitsAll = new Mat();
                 List<Mat> blkNonEmpty = new List<Mat>();
-                for (int k=0; k!=puzzle.Count; ++k)
+                for (int k = 0; k != puzzle.Count; ++k)
                 {
                     if (puzzle[k] != 0)
                     {
@@ -48,10 +49,11 @@ namespace WpfApp1.Models
                 {
                     Cv2.WaitKey();
                 }
+                return "solved";
             }
-            catch
+            catch (Exception e)
             {
-                return;
+                return e.Message;
             }
 
         }
@@ -68,7 +70,7 @@ namespace WpfApp1.Models
                     throw new Exception("No contour found in image");
                 }
                 double[] area = new double[contours.Length];
-                for (int k=0; k!=contours.Length; ++k)
+                for (int k = 0; k != contours.Length; ++k)
                 {
                     Point[] appx = Cv2.ApproxPolyDP(contours[k], 4, true);
                     if (appx.Length != 4 || !Cv2.IsContourConvex(appx))
@@ -84,7 +86,7 @@ namespace WpfApp1.Models
                 roiRect = Cv2.BoundingRect(contours[kmax]);
                 roi = img[roiRect];
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 throw new Exception(e.Message);
             }
@@ -112,7 +114,7 @@ namespace WpfApp1.Models
         {
             Cv2.FindContours(img, out Point[][] contours, out HierarchyIndex[] hind, RetrievalModes.Tree, ContourApproximationModes.ApproxSimple);
             List<Point> validContour = new List<Point>();
-            for (int k=0; k!=contours.Length; ++k)
+            for (int k = 0; k != contours.Length; ++k)
             {
                 Rect roiBox = Cv2.BoundingRect(contours[k]);
                 if (NormalizedDistance(roiBox, img.BoundingRect()) < 0.1)
@@ -142,19 +144,30 @@ namespace WpfApp1.Models
         {
             double dx = Math.Min(roi.Left - boundary.Left, boundary.Right - roi.Right) * 1.0 / boundary.Width;
             double dy = Math.Min(roi.Top - boundary.Top, boundary.Bottom - roi.Bottom) * 1.0 / boundary.Height;
-            return Math.Min(dx,dy);
+            return Math.Min(dx, dy);
         }
 
 
         private void recognizeDigits(Mat img, string key, string endpoint)
         {
             Cv2.ImWrite(TempFile, img);
-            using (FileStream stream = File.Open(TempFile, FileMode.Open, FileAccess.Read))
+            Byte[] imgStream = File.ReadAllBytes(TempFile);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(String.Format("{0}/{1}?", endpoint, "recognizeText"));
+            request.ContentType = "application/octet-stream";
+            request.Headers.Add("Ocp-Apim-Subscription-Key", key);
+            request.Method = "POST";
+            request.ContentLength = imgStream.Length;
+            Stream s = request.GetRequestStream();
+            s.Write(imgStream, 0, imgStream.Length);
+            HttpWebResponse response = null;
+            try
             {
-                VisionServiceClient srv = new VisionServiceClient(key, endpoint);
-                var response = srv.RecognizeTextAsync(stream);
+                response = request.GetResponse() as HttpWebResponse;
             }
-
+            catch(Exception e)
+            {
+                throw new Exception(e.ToString());
+            }
         }
     }
 }

@@ -21,6 +21,7 @@
             <Button Name="ImageFilePathBrowseButton" Content="Browse" Command="{Binding BtnOpenFiles_Click}"/>
             <Button Name="RestoreButton" Content="Restore" Command="{Binding BtnRestore_Click}"/>
             <Button Name="SolveButton" Command="{Binding BtnSolveIt_Click}">Solve</Button>
+            <TextBlock Name="FeedBackTextBlock" Text="{Binding ResultMessage}"/>
         </StackPanel>
     </Grid>
 </Window>
